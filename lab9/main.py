@@ -7,29 +7,35 @@ class Generation:
     __mutation_possibility = 0
     __individuals_number = 0
     __gens_number = 8
-    __desired_fit = 0.999
+    __desired_fit = 0.99
+    __f = None
 
     with_debug = True
 
-    def __init__(self, pairing_possibility, mutation_possibility, individuals_number, with_debug=True):
+    def __init__(self, pairing_possibility, mutation_possibility, individuals_number, fitness, with_debug=False):
         self.__pairing_possibility = pairing_possibility
         self.__mutation_possibility = mutation_possibility
         self.__individuals_number = individuals_number
+        self.__f = fitness
         self.with_debug = with_debug
 
     def run(self):
         population = self.__init_population()
         best_individual = self.__find_the_best({'individual': None, 'fit': 0.0}, population)
-        print('formatted', population)
         generation_count = 0
         while best_individual.get('fit') < self.__desired_fit:
             generation_count += 1
+            self.__log(('init' if generation_count == 1 else ''), 'population', population)
             population = self.__selection(population)
+            self.__log('after selection', population)
             population = self.__pairing(population)
+            self.__log('after partition', population)
             population = self.__mutation(population)
+            self.__log('after mutation', population)
             best_individual = self.__find_the_best(best_individual, population)
             if self.with_debug:
-                print(str(generation_count) + '. fit = ', best_individual.get('fit'))
+                self.__log(str(generation_count) + '. fit = ', best_individual.get('fit'))
+            self.__log('============================', '\n')
         print('finish! ', best_individual)
         print('took', generation_count, 'generations')
 
@@ -44,7 +50,7 @@ class Generation:
         return self.__fitness(individual) / sum(map(lambda x: self.__fitness(x), population))
 
     def __fitness(self, individual):
-        return sin(pi * int(individual, 2) / 256.0)
+        return self.__f(individual)
 
     def __selection(self, population):
         chances = [rnd() for x in range(8)]
@@ -101,7 +107,7 @@ class Generation:
 
     def __perform_mutation(self, gen_index, individual_index, population):
         mutated = population[individual_index][2:]
-        inverted = self.__inverse_bit(mutated[gen_index-2])  # '0b' prefix adjustment
+        inverted = self.__inverse_bit(mutated[gen_index - 2])  # '0b' prefix adjustment
         population[individual_index] = '0b' + mutated[:gen_index] + inverted + mutated[gen_index + 1:]
         return population
 
@@ -116,11 +122,23 @@ class Generation:
         return last_best
 
     def __format(self, p):
-        return [individual + '0'*(self.__gens_number + 2 - len(individual)) for individual in p]
+        return [individual + '0' * (self.__gens_number + 2 - len(individual)) for individual in p]
+
+    def __log(self, *args):
+        if self.with_debug:
+            text = ''
+            for arg in args:
+                if arg != '':
+                    text += str(arg) + ' '
+            print(text.rstrip())
 
 
 def main():
-    generation1 = Generation(0.75, 0.01, 8)
+    n = 8
+    pc = 0.75
+    pm = 0.01
+    f = lambda x: sin(pi * int(x, 2) / 256.0)
+    generation1 = Generation(pc, pm, n, f)
     generation1.run()
     pass
 
