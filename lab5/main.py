@@ -12,7 +12,7 @@ def u_function(x, y, z):
     return x + y / x + z / y + 2 / z
 
 
-def get_extremum(n):
+def find_extremum(n):
     x, y, z = sp.symbols('x y z', real=True)
     if n == 1:
         f = x * y + 50 / x + 20 / y
@@ -81,9 +81,9 @@ def get_extremum(n):
         matrix = matrix.astype(np.float64)
         d = np.linalg.det(matrix)
         if d < 0:
-            print("No extrema. d =", d)
+            print("No extremum found with d =", d)
         elif d > 0:
-            print("Extrema exists. d =", d)
+            print("Extremum found with d =", d)
             if n == 1:
                 A = z_function(sp.N(E[i][0]), sp.N(E[i][1]), 1)
                 print("z(matrix) =", A)
@@ -105,7 +105,7 @@ def get_extremum(n):
 
 def main():
     zf = np.vectorize(z_function)
-    get_extremum(1)
+    find_extremum(1)
     x, y = np.arange(0.1, 7.0, 0.1), np.arange(0.1, 7.0, 0.1)
     X, Y = pl.meshgrid(x, y)
     Z = zf(X, Y, 1)
@@ -119,9 +119,8 @@ def main():
 
     print()
 
-    get_extremum(2)
-    x = np.arange(0.1, 5.0, 0.1)
-    y = np.arange(0.1, 5.0, 0.1)
+    find_extremum(2)
+    x, y = np.arange(0.1, 5.0, 0.1), np.arange(0.1, 5.0, 0.1)
     X, Y = pl.meshgrid(x, y)
     Z = zf(X, Y, 2)
     im = pl.imshow(Z, cmap=pl.cm.RdBu)
@@ -131,7 +130,7 @@ def main():
     pl.title('z = x^2 + y^2 - 2*log(x) - 18*log(y)')
     pl.show()
     print()
-    get_extremum(3)
+    find_extremum(3)
 
 
 if __name__ == '__main__':
